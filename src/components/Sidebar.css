@@ -38,3 +38,134 @@
   padding: 0.3rem 0.5rem;
   border-radius: 4px;
 }
+/* Base sidebar */
+.sidebar {
+  width: 220px;
+  background: #253746; /* foncé comme ton capture */
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px 14px;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Titre */
+.sidebar-header {
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1;
+  margin-bottom: 18px;
+  color: #fff;
+}
+
+/* Menu principal */
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Liens principaux */
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.menu-link:hover { background: rgba(255,255,255,0.04); }
+.menu-link.active { background: rgba(255,255,255,0.07); box-shadow: inset 0 0 0 3px rgba(255,255,255,0.02); }
+
+/* icône */
+.menu-icon { width: 28px; text-align: center; font-size: 18px; }
+
+/* section paramètres */
+.sidebar-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+.sidebar-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.9);
+  font-size: 14px;
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+/* sous-menu (Paramètres) */
+.sidebar-submenu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 8px; /* indentation */
+}
+
+/* Liens du sous-menu ressemblant à ton screenshot (fond bleu pour le premier item) */
+.submenu-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.submenu-link:hover { background: rgba(255,255,255,0.03); }
+.submenu-link.active { background: rgba(255,255,255,0.06); box-shadow: inset 0 0 0 6px rgba(11, 83, 126, 0.12); }
+
+/* petit rond à gauche comme sur l'image */
+.subbullet {
+  color: rgba(255,255,255,0.6);
+  font-size: 12px;
+  width: 10px;
+  display: inline-block;
+  text-align: center;
+  margin-right: 6px;
+}
+
+/* texte du sous-menu */
+.submenu-text { display: inline-block; }
+
+/* bouton déconnexion (hérite du style .submenu-link) */
+.logout-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* pour accessibilité / focus */
+.menu-link:focus,
+.submenu-link:focus,
+.logout-btn:focus {
+  outline: 2px solid rgba(255,255,255,0.12);
+  outline-offset: 2px;
+}
+
+/* petites améliorations responsive (optionnel) */
+@media (max-width: 800px) {
+  .sidebar { display: none; }
+}
+

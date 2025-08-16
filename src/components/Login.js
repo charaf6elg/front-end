@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import './Login.css';
-
-// ⚠️ Change API_BASE si ton backend est sur un autre port/URL
-const API_BASE = 'http://localhost:3000';
+import axios from 'axios';
 
 function LoginFinal() {
   const [username, setUsername] = useState('');
@@ -22,57 +20,47 @@ function LoginFinal() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.clear();
-    console.log('SUBMIT values (avant envoi) :', { username, password });
-
-    // Validation basique côté client
+    console.log("SUBMIT values (avant envoi) :", { username, password });
+  
     if (!username.trim() || !password) {
-      alert('Veuillez renseigner username et password.');
+      alert("Veuillez renseigner username et password.");
       return;
     }
-
+  
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3000/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // 👇 Aligne avec ton backend : { username, password } ou { username, mdp: password }
-        body: JSON.stringify({ username, mdp: password }),
-        // credentials: 'include', // décommente si tu utilises des cookies côté serveur
-      });
-
-      console.log('Réponse HTTP:', res.status, res.statusText);
-
-      // récupère le corps brut pour debug si ce n'est pas JSON
-      const raw = await res.text();
-      console.log('Raw response:', raw);
-
-      if (!res.ok) {
-        // Essaie d'extraire un message d'erreur JSON, sinon utilise le texte brut
-        let message = `Erreur serveur (${res.status})`;
-        try {
-          const parsed = JSON.parse(raw);
-          message = parsed?.message || JSON.stringify(parsed) || message;
-        } catch {
-          if (raw) message = raw;
+      const res = await axios.post(
+        "http://localhost:3000/auth/login",
+        { username, mdp: password }, // Axios automatically JSON-encodes
+        {
+          headers: { "Content-Type": "application/json" },
+          // withCredentials: true, // enable if backend uses cookies
         }
-        throw new Error(message);
+      );
+  
+      console.log("Réponse HTTP:", res.status, res.statusText);
+      console.log("JSON reçu:", res.data);
+  
+      if (!res.data?.token) {
+        throw new Error("Token manquant dans la réponse du serveur.");
       }
-
-      // parse JSON (on suppose que la réponse est JSON valide)
-      const data = JSON.parse(raw);
-      console.log('JSON reçu:', data);
-
-      if (!data?.token) {
-        throw new Error('Token manquant dans la réponse du serveur.');
-      }
-
-      // Stocke le token et redirige
-      localStorage.setItem('token', data.token);
-      const redirectURL = data.redirectURL || '/dashboard';
+  
+      // Save token & redirect
+      localStorage.setItem("token", res.data.token);
+      const redirectURL = res.data.redirectURL || "/dashboard";
       window.location.href = redirectURL;
     } catch (err) {
-      console.error('Erreur login:', err);
-      alert(err.message || 'Erreur lors de la connexion');
+      console.error("Erreur login:", err);
+      if (err.response) {
+        // Server responded with error status
+        alert(err.response.data?.message || `Erreur ${err.response.status}`);
+      } else if (err.request) {
+        // Request sent but no response
+        alert("Aucune réponse du serveur (peut-être problème CORS ou backend éteint)");
+      } else {
+        // Something else happened
+        alert(err.message || "Erreur lors de la connexion");
+      }
     } finally {
       setLoading(false);
     }

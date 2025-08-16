@@ -1,7 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar.js';
-import Footer from './components/Footer.js';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LoginPage from './components/Login.js';
 import Responsable from './components/Responsable.js';
 import Produits from './components/Produits.js';
@@ -10,57 +8,67 @@ import Sidebar from './components/Sidebar.js';
 import AdminSidebar from './components/AdminSidebar.js';
 import AdminDemandes from './components/AdminDemandes.js';
 import Fournisseurs from './components/Fournisseurs.js';
-import EmployeSidebar from './components/EmployeSidebar.js';     // ✅ nouveau
-import EmployeDemandes from './components/EmployeDemandes.js';   // ✅ nouveau
+import EmployeSidebar from './components/EmployeSidebar.js';
+import EmployeDemandes from './components/EmployeDemandes.js';
+import ResetPassword from './components/ResetPassword.js';
 
-function HomePage() {
-  return (
-    <>
-      <Navbar />
-      <main style={{ marginLeft: 0, padding: '1rem' }}>
-        <h1>Bienvenue sur mon site React</h1>
-        <p>Ceci est la page d'accueil</p>
-      </main>
-      <Footer />
-    </>
-  );
+// === Composant PrivateRoute ===
+function PrivateRoute({ element, allowedRoles }) {
+  const role = localStorage.getItem('role'); // Rôle défini après login
+  return allowedRoles.includes(role) ? element : <Navigate to="/login" replace />;
 }
 
+// === Layout avec Sidebars dynamiques ===
 function Layout() {
   const location = useLocation();
+  const role = localStorage.getItem('role');
 
-  const isAdmin = location.pathname.startsWith('/admin');
-  const isEmploye = location.pathname.startsWith('/employe'); // ✅ nouveau
-  const showRespSidebar = ['/responsable', '/produits', '/utilisateurs', '/fournisseurs'].includes(location.pathname);
-
-  // Choix de la sidebar selon le contexte
-  const sidebar = isAdmin ? <AdminSidebar /> : isEmploye ? <EmployeSidebar /> : (showRespSidebar && <Sidebar />);
+  // Déterminer la sidebar à afficher selon le rôle
+  const getSidebarComponent = () => {
+    if (role === 'admin') return <AdminSidebar />;
+    if (role === 'employe') return <EmployeSidebar />;
+    if (role === 'responsable') return <Sidebar />;
+    return null;
+  };
 
   return (
     <div style={{ display: 'flex' }}>
-      {sidebar}
-      <div style={{ flex: 1, marginLeft: sidebar ? 220 : 0, padding: '1rem' }}>
+      {getSidebarComponent()}
+      <div
+        style={{
+          flex: 1,
+          marginLeft: getSidebarComponent() ? '220px' : '0',
+          padding: '1rem',
+          transition: 'margin-left 0.3s ease'
+        }}
+      >
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          {/* Public */}
+          <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
 
           {/* Responsable */}
-          <Route path="/responsable" element={<Responsable />} />
-          <Route path="/produits" element={<Produits />} />
-          <Route path="/utilisateurs" element={<Utilisateurs />} />
-          <Route path="/fournisseurs" element={<Fournisseurs />} />
+          <Route path="/responsable" element={<PrivateRoute element={<Responsable />} allowedRoles={['responsable']} />} />
+          <Route path="/produits" element={<PrivateRoute element={<Produits />} allowedRoles={['responsable']} />} />
+          <Route path="/utilisateurs" element={<PrivateRoute element={<Utilisateurs />} allowedRoles={['responsable']} />} />
+          <Route path="/fournisseurs" element={<PrivateRoute element={<Fournisseurs />} allowedRoles={['responsable']} />} />
+          <Route path="/reset-password" element={<PrivateRoute element={<ResetPassword />} allowedRoles={['responsable']} />} />
 
           {/* Admin */}
-          <Route path="/admin/demandes" element={<AdminDemandes />} />
+          <Route path="/admin/demandes" element={<PrivateRoute element={<AdminDemandes />} allowedRoles={['admin']} />} />
 
           {/* Employé */}
-          <Route path="/employe/demandes" element={<EmployeDemandes />} />
+          <Route path="/employe/demandes" element={<PrivateRoute element={<EmployeDemandes />} allowedRoles={['employe']} />} />
+
+          {/* Si aucune route trouvée */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </div>
     </div>
   );
 }
 
+// === App principale ===
 export default function App() {
   return (
     <Router>
